@@ -4,6 +4,7 @@ import string
 import contractions
 import unicodedata
 from torch.utils.data import DataLoader
+import matplotlib.pyplot as plt
 
 
 def load_data(path):
@@ -64,7 +65,13 @@ def normalize_text(batch):
 
 if __name__ == "__main__":
     train, val, test = load_data("stanfordnlp/imdb")
-    for batch in train:
-        for i in range(10):
-            print(batch["text"][i])
-        break
+    plt.figure(figsize=(10, 5))
+    plt.bar(
+        ["train", "val", "test"],
+        [len(train.dataset), len(val.dataset), len(test.dataset)],
+        color=["blue", "orange", "green"],
+    )
+    plt.title("Dataset Sizes")
+    plt.xlabel("Dataset Split")
+    plt.ylabel("Number of Samples")
+    plt.show()
