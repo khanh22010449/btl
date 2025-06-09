@@ -2,6 +2,7 @@ from datasets import load_dataset
 import re
 import string
 import contractions
+import unicodedata
 from torch.utils.data import DataLoader
 
 
@@ -36,21 +37,23 @@ def normalize_for_bpe(sentence):
     if not isinstance(sentence, str):
         raise TypeError("Expected a string input for normalization.")
 
-    # text = sentence.lower()
+    # Chuẩn hóa văn bản thành dạng NFC (Normalization Form C)
+    text = unicodedata.normalize("NFC", sentence)
 
     # Loại bỏ thẻ HTML
-    text = re.sub(r"<.*?>", " ", sentence)
+    text = re.sub(r"<.*?>", " ", text)
     text = re.sub(r"http[s]?://[^\s)]+", "", text)
-    # Chuẩn hóa khoảng trắng sớm
-    text = re.sub(r"\s+", " ", text).strip()
+
     # Giãn từ viết tắt
     text = contractions.fix(text)
-    # Thêm khoảng trắng quanh dấu câu
-    # text = re.sub(r"[.,?!;:()/-]", lambda match: f" {match.group(0)} ", text)
-    # text = re.sub(r"([.,?!;:()\"'/\[\]{}\-])", r" \1 ", text)
 
-    # Chuẩn hóa khoảng trắng cuối
+    # Loại bỏ tất cả các ký tự không phải ASCII, giữ lại chữ cái, số và dấu câu cơ bản
+    allowed_chars = set(string.ascii_letters + string.digits + string.punctuation + " ")
+    text = "".join(c for c in text if c in allowed_chars)
+
+    # Chuẩn hóa khoảng trắng
     text = re.sub(r"\s+", " ", text).strip()
+
     return text
 
 
